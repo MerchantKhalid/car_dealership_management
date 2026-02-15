@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  SALESPERSON
+  MECHANIC
+  VIEWER
+}
+
+enum CarStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  IN_REPAIR
+  TEST_DRIVE
+}
+
+enum LeadSource {
+  WALK_IN
+  PHONE
+  OLX
+  STANDVIRTUAL
+  FACEBOOK
+  REFERRAL
+  OTHER
+}
+
+enum CustomerStatus {
+  NEW_LEAD
+  CONTACTED
+  TEST_DRIVE_DONE
+  NEGOTIATING
+  SOLD
+  LOST
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  FINANCING
+  PAYMENT_PLAN
+}
+
+enum PaymentStatus {
+  PENDING
+  DEPOSIT_PAID
+  PAID_IN_FULL
+}
+
+enum ExpenseType {
+  REPAIR
+  DETAILING
+  REGISTRATION
+  INSPECTION
+  TRANSPORT
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(VIEWER)
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sales    Sale[]
+  expenses Expense[]
+  tasks    Task[]
+}
+
+model Car {
+  id           String @id @default(uuid())
+  make         String
+  model        String
+  year         Int
+  color        String
+  mileage      Int
+  vin          String @unique
+  licensePlate String? @unique
+
+  purchasePrice Float
+  purchaseDate  DateTime
+  boughtFrom    String?
+
+  targetPrice  Float
+  minimumPrice Float?
+
+  status   CarStatus @default(AVAILABLE)
+  location String?
+
+  conditionNotes String?
+  mainPhoto      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  photos     CarPhoto[]
+  expenses   Expense[]
+  sale       Sale?
+  testDrives TestDrive[]
+  customers  CustomerCar[]
+
+  @@index([status])
+  @@index([make])
+}
+
+model CarPhoto {
+  id        String   @id @default(uuid())
+  carId     String
+  url       String
+  isMain    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+}
+
+model Customer {
+  id           String         @id @default(uuid())
+  name         String
+  phone        String
+  email        String?
+  address      String?
+  leadSource   LeadSource
+  status       CustomerStatus @default(NEW_LEAD)
+  notes        String?
+  followUpDate DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  interestedCars CustomerCar[]
+  testDrives     TestDrive[]
+  sales          Sale[]
+
+  @@index([status])
+  @@index([followUpDate])
+}
+
+model CustomerCar {
+  id         String   @id @default(uuid())
+  customerId String
+  carId      String
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  car      Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, carId])
+  @@index([customerId])
+  @@index([carId])
+}
+
+model Sale {
+  id            String        @id @default(uuid())
+  carId         String        @unique
+  customerId    String
+  sellerId      String?
+  salePrice     Float
+  saleDate      DateTime
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  commission    Float?
+  contractUrl   String?
+  profit        Float?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  car      Car      @relation(fields: [carId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+  seller   User?    @relation(fields: [sellerId], references: [id])
+
+  @@index([saleDate])
+  @@index([customerId])
+}
+
+model Expense {
+  id          String      @id @default(uuid())
+  carId       String
+  userId      String?
+  type        ExpenseType
+  amount      Float
+  date        DateTime
+  description String
+  vendor      String?
+  receiptUrl  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  car  Car   @relation(fields: [carId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([carId])
+  @@index([date])
+}
+
+model TestDrive {
+  id         String   @id @default(uuid())
+  carId      String
+  customerId String
+  date       DateTime
+  notes      String?
+  idCopyUrl  String?
+  createdAt  DateTime @default(now())
+
+  car      Car      @relation(fields: [carId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@index([date])
+  @@index([carId])
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  carId       String?
+  assignedTo  String?
+  dueDate     DateTime?
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  assignee User? @relation(fields: [assignedTo], references: [id])
+
+  @@index([status])
+  @@index([dueDate])
+}
