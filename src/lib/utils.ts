@@ -87,6 +87,11 @@ export function getPaymentStatusColor(status: string): string {
   };
   return colors[status] || 'bg-gray-100 text-gray-800';
 }
+export const paymentStatusColors: Record<string, string> = {
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  DEPOSIT_PAID: 'bg-blue-100 text-blue-800',
+  PAID_IN_FULL: 'bg-green-100 text-green-800',
+};
 
 export function getPriorityColor(priority: string): string {
   const colors: Record<string, string> = {
@@ -160,4 +165,12 @@ export const taskStatusLabels: Record<string, string> = {
   IN_PROGRESS: 'In Progress',
   COMPLETED: 'Completed',
   CANCELLED: 'Cancelled',
+};
+export const customerStatusColors: Record<string, string> = {
+  NEW_LEAD: 'bg-blue-100 text-blue-800',
+  CONTACTED: 'bg-yellow-100 text-yellow-800',
+  TEST_DRIVE_DONE: 'bg-purple-100 text-purple-800',
+  NEGOTIATING: 'bg-orange-100 text-orange-800',
+  SOLD: 'bg-green-100 text-green-800',
+  LOST: 'bg-gray-100 text-gray-800',
 };

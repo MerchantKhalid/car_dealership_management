@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 
+// ============================================================================
+// BACKEND ERROR HANDLING (API Routes)
+// ============================================================================
+
 export function handleApiError(error: unknown) {
   // Zod validation errors
   if (error instanceof ZodError) {
@@ -58,8 +62,43 @@ export function handleApiError(error: unknown) {
   return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 }
 
+// ============================================================================
+// FRONTEND ERROR HANDLING (Client Components)
+// ============================================================================
+
+/**
+ * Extracts user-friendly error message from various error types
+ * Use this in client components with toast notifications
+ */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+
+  // Handle API error responses
+  if (error && typeof error === 'object' && 'error' in error) {
+    const err = error as { error: string };
+    if (typeof err.error === 'string') return err.error;
+  }
+
+  return 'An unexpected error occurred';
+}
+
+/**
+ * Logs error with optional context
+ */
+export function logError(error: unknown, context?: string): void {
+  if (context) {
+    console.error(`Error in ${context}:`, error);
+  } else {
+    console.error('Error:', error);
+  }
+}
+
+/**
+ * Combines logging and message extraction
+ * Use both logging and user message
+ */
+export function handleClientError(error: unknown, context?: string): string {
+  logError(error, context);
+  return getErrorMessage(error);
 }
