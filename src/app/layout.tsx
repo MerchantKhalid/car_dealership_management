@@ -37,8 +37,8 @@ import ToastProvider from '@/components/providers/toast-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'WeCars - Management System',
-  description: 'WeCars Used Car Dealership Management System',
+  title: 'BDCars - Management System',
+  description: 'BDCars Used Car Dealership Management System',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
