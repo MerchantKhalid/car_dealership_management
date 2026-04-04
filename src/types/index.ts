@@ -768,6 +768,7 @@ export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 // ============================================================================
 
 export interface CarWithRelations extends Car {
+  transmission?: string | null;
   photos: CarPhoto[];
   expenses: Expense[];
   sale?: Sale & { customer: Customer };
