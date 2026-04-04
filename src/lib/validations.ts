@@ -224,6 +224,7 @@ export const carSchema = z.object({
   status: z.enum(['AVAILABLE', 'RESERVED', 'SOLD', 'IN_REPAIR', 'TEST_DRIVE']),
   location: z.string().optional().or(z.literal('')),
   conditionNotes: z.string().optional().or(z.literal('')),
+  transmission: z.string().optional().or(z.literal('')),
 });
 
 export const customerSchema = z.object({

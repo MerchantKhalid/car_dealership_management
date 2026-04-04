@@ -311,13 +311,13 @@ export default function CarDetailPage({ params }: { params: { id: string } }) {
               </div>
             </div>
 
-            {car.notes && (
+            {car.conditionNotes && (
               <div className="mt-6 pt-4 border-t">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Notes
                 </h3>
                 <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                  {car.notes}
+                  {car.conditionNotes}
                 </p>
               </div>
             )}
