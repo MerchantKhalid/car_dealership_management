@@ -1189,6 +1189,7 @@ model Installment {
   @@index([status])
 }
 
+
 model Sale {
   id            String        @id @default(uuid())
   carId         String        @unique
@@ -1204,15 +1205,56 @@ model Sale {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  car      Car      @relation(fields: [carId], references: [id])
-  customer Customer @relation(fields: [customerId], references: [id])
-  seller   User?    @relation(fields: [sellerId], references: [id])
+  car      Car          @relation(fields: [carId], references: [id])
+  customer Customer     @relation(fields: [customerId], references: [id])
+  seller   User?        @relation(fields: [sellerId], references: [id])
+  payments SalePayment[]
 
   @@index([saleDate])
   @@index([customerId])
   @@index([saleDate, paymentStatus])
   @@index([sellerId])
 }
+
+model SalePayment {
+  id        String        @id @default(uuid())
+  saleId    String
+  amount    Float
+  date      DateTime
+  method    PaymentMethod
+  reference String?
+  notes     String?
+  createdAt DateTime      @default(now())
+
+  sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+}
+
+// model Sale {
+//   id            String        @id @default(uuid())
+//   carId         String        @unique
+//   customerId    String
+//   sellerId      String?
+//   salePrice     Float
+//   saleDate      DateTime
+//   paymentMethod PaymentMethod
+//   paymentStatus PaymentStatus @default(PENDING)
+//   commission    Float?
+//   contractUrl   String?
+//   profit        Float?
+//   createdAt     DateTime      @default(now())
+//   updatedAt     DateTime      @updatedAt
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+//   seller   User?    @relation(fields: [sellerId], references: [id])
+
+//   @@index([saleDate])
+//   @@index([customerId])
+//   @@index([saleDate, paymentStatus])
+//   @@index([sellerId])
+// }
 
 model Expense {
   id          String      @id @default(uuid())
