@@ -82,13 +82,31 @@ export default function DashboardPage() {
     fetchStats();
   }, []);
 
+  // const fetchStats = async () => {
+  //   try {
+  //     const res = await fetch('/api/dashboard/stats');
+  //     const data = await res.json();
+  //     setStats(data);
+  //   } catch (error) {
+  //     console.error('Error fetching stats:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchStats = async () => {
     try {
       const res = await fetch('/api/dashboard/stats');
+      if (!res.ok) throw new Error('Failed to fetch stats');
       const data = await res.json();
-      setStats(data);
+      if (data && typeof data.thisMonth !== 'undefined') {
+        setStats(data);
+      } else {
+        throw new Error('Unexpected stats shape');
+      }
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setStats(null); // keeps the existing null-guard below working
     } finally {
       setLoading(false);
     }

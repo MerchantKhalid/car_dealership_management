@@ -254,9 +254,14 @@ export default function CustomersPage() {
       if (statusFilter) params.set('status', statusFilter);
       if (leadSourceFilter) params.set('leadSource', leadSourceFilter);
 
+      // const res = await fetch(`/api/customers?${params.toString()}`);
+      // const data = await res.json();
+      // setCustomers(data);
+
       const res = await fetch(`/api/customers?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch customers');
       const data = await res.json();
-      setCustomers(data);
+      setCustomers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching customers:', error);
     } finally {

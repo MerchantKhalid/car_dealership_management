@@ -1,4 +1,918 @@
 
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// enum Role {
+//   OWNER
+//   SALESPERSON
+//   MECHANIC
+//   VIEWER
+// }
+
+// enum CarStatus {
+//   AVAILABLE
+//   RESERVED
+//   SOLD
+//   IN_REPAIR
+//   TEST_DRIVE
+// }
+
+// enum LeadSource {
+//   WALK_IN
+//   PHONE
+//   OLX
+//   STANDVIRTUAL
+//   FACEBOOK
+//   REFERRAL
+//   OTHER
+// }
+
+// enum CustomerStatus {
+//   NEW_LEAD
+//   CONTACTED
+//   TEST_DRIVE_DONE
+//   NEGOTIATING
+//   SOLD
+//   LOST
+// }
+
+// enum PaymentMethod {
+//   CASH
+//   BANK_TRANSFER
+//   FINANCING
+//   PAYMENT_PLAN
+// }
+
+// enum PaymentStatus {
+//   PENDING
+//   DEPOSIT_PAID
+//   PAID_IN_FULL
+// }
+
+// enum ExpenseType {
+//   REPAIR
+//   DETAILING
+//   REGISTRATION
+//   INSPECTION
+//   TRANSPORT
+//   OTHER
+// }
+
+// enum Priority {
+//   LOW
+//   MEDIUM
+//   HIGH
+//   URGENT
+// }
+
+// enum TaskStatus {
+//   PENDING
+//   IN_PROGRESS
+//   COMPLETED
+//   CANCELLED
+// }
+
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   password  String
+//   name      String
+//   role      Role     @default(VIEWER)
+//   phone     String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   sales    Sale[]
+//   expenses Expense[]
+//   tasks    Task[]
+// }
+
+// model Car {
+//   id           String  @id @default(uuid())
+//   make         String
+//   model        String
+//   year         Int
+//   color        String
+//   mileage      Int
+//   vin          String  @unique
+//   licensePlate String? @unique
+
+//   purchasePrice Float
+//   purchaseDate  DateTime
+//   boughtFrom    String?
+
+//   targetPrice  Float
+//   minimumPrice Float?
+
+//   status   CarStatus @default(AVAILABLE)
+//   location String?
+
+//   conditionNotes String?
+//   mainPhoto      String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   photos     CarPhoto[]
+//   expenses   Expense[]
+//   sale       Sale?
+//   testDrives TestDrive[]
+//   customers  CustomerCar[]
+
+//   @@index([status])
+//   @@index([make])
+//   @@index([status, purchaseDate])
+//   @@index([make, model])
+//   @@index([purchaseDate])
+// }
+
+// model CarPhoto {
+//   id        String   @id @default(uuid())
+//   carId     String
+//   url       String
+//   isMain    Boolean  @default(false)
+//   createdAt DateTime @default(now())
+
+//   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+//   @@index([carId])
+// }
+
+// model Customer {
+//   id           String         @id @default(uuid())
+//   name         String
+//   phone        String
+//   email        String?
+//   address      String?
+//   leadSource   LeadSource
+//   status       CustomerStatus @default(NEW_LEAD)
+//   notes        String?
+//   followUpDate DateTime?
+//   createdAt    DateTime       @default(now())
+//   updatedAt    DateTime       @updatedAt
+
+//   interestedCars CustomerCar[]
+//   testDrives     TestDrive[]
+//   sales          Sale[]
+
+//   @@index([status])
+//   @@index([followUpDate])
+//   @@index([followUpDate, status])
+// }
+
+// model CustomerCar {
+//   id         String   @id @default(uuid())
+//   customerId String
+//   carId      String
+//   createdAt  DateTime @default(now())
+
+//   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+//   car      Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+//   @@unique([customerId, carId])
+//   @@index([customerId])
+//   @@index([carId])
+// }
+
+// model Sale {
+//   id            String        @id @default(uuid())
+//   carId         String        @unique
+//   customerId    String
+//   sellerId      String?
+//   salePrice     Float
+//   saleDate      DateTime
+//   paymentMethod PaymentMethod
+//   paymentStatus PaymentStatus @default(PENDING)
+//   commission    Float?
+//   contractUrl   String?
+//   profit        Float?
+//   createdAt     DateTime      @default(now())
+//   updatedAt     DateTime      @updatedAt
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+//   seller   User?    @relation(fields: [sellerId], references: [id])
+
+//   @@index([saleDate])
+//   @@index([customerId])
+//   @@index([saleDate, paymentStatus])
+//   @@index([sellerId])
+// }
+
+// model Expense {
+//   id          String      @id @default(uuid())
+//   carId       String
+//   userId      String?
+//   type        ExpenseType
+//   amount      Float
+//   date        DateTime
+//   description String
+//   vendor      String?
+//   receiptUrl  String?
+//   createdAt   DateTime    @default(now())
+//   updatedAt   DateTime    @updatedAt
+
+//   car  Car   @relation(fields: [carId], references: [id], onDelete: Cascade)
+//   user User? @relation(fields: [userId], references: [id])
+
+//   @@index([carId])
+//   @@index([date])
+//   @@index([type, date])
+// }
+
+// model TestDrive {
+//   id         String   @id @default(uuid())
+//   carId      String
+//   customerId String
+//   date       DateTime
+//   notes      String?
+//   idCopyUrl  String?
+//   createdAt  DateTime @default(now())
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+
+//   @@index([date])
+//   @@index([carId])
+// }
+
+// model Task {
+//   id          String     @id @default(uuid())
+//   title       String
+//   description String?
+//   carId       String?
+//   assignedTo  String?
+//   dueDate     DateTime?
+//   priority    Priority   @default(MEDIUM)
+//   status      TaskStatus @default(PENDING)
+//   createdAt   DateTime   @default(now())
+//   updatedAt   DateTime   @updatedAt
+
+//   assignee User? @relation(fields: [assignedTo], references: [id])
+
+//   @@index([status])
+//   @@index([dueDate])
+//   @@index([assignedTo, status])
+// }
+
+
+
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// enum Role {
+//   OWNER
+//   SALESPERSON
+//   MECHANIC
+//   VIEWER
+// }
+
+// enum CarStatus {
+//   AVAILABLE
+//   RESERVED
+//   SOLD
+//   IN_REPAIR
+//   TEST_DRIVE
+// }
+
+// enum LeadSource {
+//   WALK_IN
+//   PHONE
+//   OLX
+//   STANDVIRTUAL
+//   FACEBOOK
+//   REFERRAL
+//   OTHER
+// }
+
+// enum CustomerStatus {
+//   NEW_LEAD
+//   CONTACTED
+//   TEST_DRIVE_DONE
+//   NEGOTIATING
+//   SOLD
+//   LOST
+// }
+
+// enum PaymentMethod {
+//   CASH
+//   BANK_TRANSFER
+//   FINANCING
+//   PAYMENT_PLAN
+// }
+
+// enum PaymentStatus {
+//   PENDING
+//   DEPOSIT_PAID
+//   PAID_IN_FULL
+// }
+
+// enum ExpenseType {
+//   REPAIR
+//   DETAILING
+//   REGISTRATION
+//   INSPECTION
+//   TRANSPORT
+//   OTHER
+// }
+
+// enum Priority {
+//   LOW
+//   MEDIUM
+//   HIGH
+//   URGENT
+// }
+
+// enum TaskStatus {
+//   PENDING
+//   IN_PROGRESS
+//   COMPLETED
+//   CANCELLED
+// }
+
+// enum DeliveryStatus {
+//   PENDING
+//   DELIVERED
+//   CANCELLED
+// }
+
+// enum RegistrationStatus {
+//   PENDING
+//   IN_PROGRESS
+//   COMPLETED
+//   NOT_REQUIRED
+// }
+
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   password  String
+//   name      String
+//   role      Role     @default(VIEWER)
+//   phone     String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   sales    Sale[]
+//   expenses Expense[]
+//   tasks    Task[]
+// }
+
+// model Car {
+//   id           String  @id @default(uuid())
+//   make         String
+//   model        String
+//   year         Int
+//   color        String
+//   mileage      Int
+//   vin          String  @unique
+//   licensePlate String? @unique
+
+//   purchasePrice Float
+//   purchaseDate  DateTime
+//   boughtFrom    String?
+
+//   targetPrice  Float
+//   minimumPrice Float?
+
+//   status   CarStatus @default(AVAILABLE)
+//   location String?
+
+//   conditionNotes String?
+//   mainPhoto      String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   photos     CarPhoto[]
+//   expenses   Expense[]
+//   sale       Sale?
+//   testDrives TestDrive[]
+//   customers  CustomerCar[]
+
+//   @@index([status])
+//   @@index([make])
+//   @@index([status, purchaseDate])
+//   @@index([make, model])
+//   @@index([purchaseDate])
+// }
+
+// model CarPhoto {
+//   id        String   @id @default(uuid())
+//   carId     String
+//   url       String
+//   isMain    Boolean  @default(false)
+//   createdAt DateTime @default(now())
+
+//   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+//   @@index([carId])
+// }
+
+// model Customer {
+//   id           String         @id @default(uuid())
+//   name         String
+//   phone        String
+//   email        String?
+//   address      String?
+//   leadSource   LeadSource
+//   status       CustomerStatus @default(NEW_LEAD)
+//   notes        String?
+//   followUpDate DateTime?
+//   createdAt    DateTime       @default(now())
+//   updatedAt    DateTime       @updatedAt
+
+//   interestedCars CustomerCar[]
+//   testDrives     TestDrive[]
+//   sales          Sale[]
+
+//   @@index([status])
+//   @@index([followUpDate])
+//   @@index([followUpDate, status])
+// }
+
+// model CustomerCar {
+//   id         String   @id @default(uuid())
+//   customerId String
+//   carId      String
+//   createdAt  DateTime @default(now())
+
+//   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+//   car      Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+//   @@unique([customerId, carId])
+//   @@index([customerId])
+//   @@index([carId])
+// }
+
+// model Sale {
+//   id            String        @id @default(uuid())
+//   carId         String        @unique
+//   customerId    String
+//   sellerId      String?
+//   salePrice     Float
+//   saleDate      DateTime
+//   paymentMethod PaymentMethod
+//   paymentStatus PaymentStatus @default(PENDING)
+//   commission    Float?
+//   contractUrl   String?
+//   profit        Float?
+
+//   dueDate              DateTime?
+//   cnic                 String?
+//   dealNotes            String?
+//   deliveryStatus       DeliveryStatus     @default(PENDING)
+//   registrationStatus   RegistrationStatus @default(PENDING)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+//   seller   User?    @relation(fields: [sellerId], references: [id])
+//   payments SalePayment[]
+
+//   @@index([saleDate])
+//   @@index([customerId])
+//   @@index([saleDate, paymentStatus])
+//   @@index([sellerId])
+// }
+
+// model SalePayment {
+//   id        String        @id @default(uuid())
+//   saleId    String
+//   date      DateTime
+//   amount    Float
+//   method    PaymentMethod
+//   reference String?
+//   notes     String?
+//   createdAt DateTime      @default(now())
+
+//   sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+//   @@index([saleId])
+//   @@index([saleId, date])
+// }
+
+// model Expense {
+//   id          String      @id @default(uuid())
+//   carId       String
+//   userId      String?
+//   type        ExpenseType
+//   amount      Float
+//   date        DateTime
+//   description String
+//   vendor      String?
+//   receiptUrl  String?
+//   createdAt   DateTime    @default(now())
+//   updatedAt   DateTime    @updatedAt
+
+//   car  Car   @relation(fields: [carId], references: [id], onDelete: Cascade)
+//   user User? @relation(fields: [userId], references: [id])
+
+//   @@index([carId])
+//   @@index([date])
+//   @@index([type, date])
+// }
+
+// model TestDrive {
+//   id         String   @id @default(uuid())
+//   carId      String
+//   customerId String
+//   date       DateTime
+//   notes      String?
+//   idCopyUrl  String?
+//   createdAt  DateTime @default(now())
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+
+//   @@index([date])
+//   @@index([carId])
+// }
+
+// model Task {
+//   id          String     @id @default(uuid())
+//   title       String
+//   description String?
+//   carId       String?
+//   assignedTo  String?
+//   dueDate     DateTime?
+//   priority    Priority   @default(MEDIUM)
+//   status      TaskStatus @default(PENDING)
+//   createdAt   DateTime   @default(now())
+//   updatedAt   DateTime   @updatedAt
+
+//   assignee User? @relation(fields: [assignedTo], references: [id])
+
+//   @@index([status])
+//   @@index([dueDate])
+//   @@index([assignedTo, status])
+// }
+
+
+
+
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// enum Role {
+//   OWNER
+//   SALESPERSON
+//   MECHANIC
+//   VIEWER
+// }
+
+// enum CarStatus {
+//   AVAILABLE
+//   RESERVED
+//   SOLD
+//   IN_REPAIR
+//   TEST_DRIVE
+// }
+
+// enum LeadSource {
+//   WALK_IN
+//   PHONE
+//   OLX
+//   STANDVIRTUAL
+//   FACEBOOK
+//   REFERRAL
+//   OTHER
+// }
+
+// enum CustomerStatus {
+//   NEW_LEAD
+//   CONTACTED
+//   TEST_DRIVE_DONE
+//   NEGOTIATING
+//   SOLD
+//   LOST
+// }
+
+// enum PaymentMethod {
+//   CASH
+//   BANK_TRANSFER
+//   FINANCING
+//   PAYMENT_PLAN
+// }
+
+// enum PaymentStatus {
+//   PENDING
+//   DEPOSIT_PAID
+//   PAID_IN_FULL
+// }
+
+// // NEW: Status for each installment in a payment plan
+// enum InstallmentStatus {
+//   PENDING
+//   PAID
+//   LATE
+// }
+
+// enum ExpenseType {
+//   REPAIR
+//   DETAILING
+//   REGISTRATION
+//   INSPECTION
+//   TRANSPORT
+//   OTHER
+// }
+
+// enum Priority {
+//   LOW
+//   MEDIUM
+//   HIGH
+//   URGENT
+// }
+
+// enum TaskStatus {
+//   PENDING
+//   IN_PROGRESS
+//   COMPLETED
+//   CANCELLED
+// }
+
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   password  String
+//   name      String
+//   role      Role     @default(VIEWER)
+//   phone     String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   sales    Sale[]
+//   expenses Expense[]
+//   tasks    Task[]
+//   deals    Deal[]     // NEW: deals handled by this user
+// }
+
+// model Car {
+//   id           String  @id @default(uuid())
+//   make         String
+//   model        String
+//   year         Int
+//   color        String
+//   mileage      Int
+//   vin          String  @unique
+//   licensePlate String? @unique
+
+//   purchasePrice Float
+//   purchaseDate  DateTime
+//   boughtFrom    String?
+
+//   targetPrice  Float
+//   minimumPrice Float?
+
+//   status   CarStatus @default(AVAILABLE)
+//   location String?
+
+//   conditionNotes String?
+//   mainPhoto      String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   photos     CarPhoto[]
+//   expenses   Expense[]
+//   sale       Sale?
+//   testDrives TestDrive[]
+//   customers  CustomerCar[]
+//   deal       Deal?         // NEW: one-to-one with Deal
+
+//   @@index([status])
+//   @@index([make])
+//   @@index([status, purchaseDate])
+//   @@index([make, model])
+//   @@index([purchaseDate])
+// }
+
+// model CarPhoto {
+//   id        String   @id @default(uuid())
+//   carId     String
+//   url       String
+//   isMain    Boolean  @default(false)
+//   createdAt DateTime @default(now())
+
+//   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+//   @@index([carId])
+// }
+
+// model Customer {
+//   id           String         @id @default(uuid())
+//   name         String
+//   phone        String
+//   email        String?
+//   address      String?
+//   leadSource   LeadSource
+//   status       CustomerStatus @default(NEW_LEAD)
+//   notes        String?
+//   followUpDate DateTime?
+//   createdAt    DateTime       @default(now())
+//   updatedAt    DateTime       @updatedAt
+
+//   interestedCars CustomerCar[]
+//   testDrives     TestDrive[]
+//   sales          Sale[]
+//   deal           Deal?         // NEW: one-to-one with Deal
+
+//   @@index([status])
+//   @@index([followUpDate])
+//   @@index([followUpDate, status])
+// }
+
+// model CustomerCar {
+//   id         String   @id @default(uuid())
+//   customerId String
+//   carId      String
+//   createdAt  DateTime @default(now())
+
+//   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+//   car      Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+//   @@unique([customerId, carId])
+//   @@index([customerId])
+//   @@index([carId])
+// }
+
+// // ============================================================
+// // NEW MODEL: Deal — the buyer's transaction record
+// // Tracks the chosen car, agreed price, deposit, payment info,
+// // salesperson, and links to installments if payment plan used.
+// // ============================================================
+// model Deal {
+//   id String @id @default(uuid())
+
+//   // Links to customer and car (both unique = one deal per customer & car)
+//   customerId String   @unique
+//   carId      String   @unique
+
+//   // The salesperson / deal handler
+//   handlerId  String?
+
+//   // Agreed price (may differ from car's targetPrice after negotiation)
+//   agreedPrice     Float
+//   // Deposit / advance payment
+//   depositAmount   Float   @default(0)
+//   depositDate     DateTime?
+//   depositPaidBy   String? // e.g. cash, transfer, etc. – free text note
+
+//   // Payment details
+//   paymentMethod   PaymentMethod
+//   paymentStatus   PaymentStatus @default(PENDING)
+
+//   // Remaining balance is always: agreedPrice - depositAmount - sum(paid installments)
+//   // We store expectedFinalPaymentDate for deadline tracking
+//   expectedFinalPaymentDate DateTime?
+
+//   // Optional notes for this deal
+//   notes String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+//   car          Car           @relation(fields: [carId], references: [id], onDelete: Cascade)
+//   handler      User?         @relation(fields: [handlerId], references: [id])
+//   installments Installment[] // payment plan installments
+
+//   @@index([handlerId])
+//   @@index([paymentStatus])
+//   @@index([expectedFinalPaymentDate])
+// }
+
+// // ============================================================
+// // NEW MODEL: Installment — one row per scheduled payment
+// // Used when paymentMethod = PAYMENT_PLAN
+// // ============================================================
+// model Installment {
+//   id     String @id @default(uuid())
+//   dealId String
+
+//   installmentNumber Int       // 1, 2, 3, ...
+//   amount            Float
+//   dueDate           DateTime
+//   paidDate          DateTime? // null = not yet paid
+//   status            InstallmentStatus @default(PENDING)
+//   notes             String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+//   @@index([dealId])
+//   @@index([dueDate])
+//   @@index([status])
+// }
+
+// model Sale {
+//   id            String        @id @default(uuid())
+//   carId         String        @unique
+//   customerId    String
+//   sellerId      String?
+//   salePrice     Float
+//   saleDate      DateTime
+//   paymentMethod PaymentMethod
+//   paymentStatus PaymentStatus @default(PENDING)
+//   commission    Float?
+//   contractUrl   String?
+//   profit        Float?
+//   createdAt     DateTime      @default(now())
+//   updatedAt     DateTime      @updatedAt
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+//   seller   User?    @relation(fields: [sellerId], references: [id])
+
+//   @@index([saleDate])
+//   @@index([customerId])
+//   @@index([saleDate, paymentStatus])
+//   @@index([sellerId])
+// }
+
+// model Expense {
+//   id          String      @id @default(uuid())
+//   carId       String
+//   userId      String?
+//   type        ExpenseType
+//   amount      Float
+//   date        DateTime
+//   description String
+//   vendor      String?
+//   receiptUrl  String?
+//   createdAt   DateTime    @default(now())
+//   updatedAt   DateTime    @updatedAt
+
+//   car  Car   @relation(fields: [carId], references: [id], onDelete: Cascade)
+//   user User? @relation(fields: [userId], references: [id])
+
+//   @@index([carId])
+//   @@index([date])
+//   @@index([type, date])
+// }
+
+// model TestDrive {
+//   id         String   @id @default(uuid())
+//   carId      String
+//   customerId String
+//   date       DateTime
+//   notes      String?
+//   idCopyUrl  String?
+//   createdAt  DateTime @default(now())
+
+//   car      Car      @relation(fields: [carId], references: [id])
+//   customer Customer @relation(fields: [customerId], references: [id])
+
+//   @@index([date])
+//   @@index([carId])
+// }
+
+// model Task {
+//   id          String     @id @default(uuid())
+//   title       String
+//   description String?
+//   carId       String?
+//   assignedTo  String?
+//   dueDate     DateTime?
+//   priority    Priority   @default(MEDIUM)
+//   status      TaskStatus @default(PENDING)
+//   createdAt   DateTime   @default(now())
+//   updatedAt   DateTime   @updatedAt
+
+//   assignee User? @relation(fields: [assignedTo], references: [id])
+
+//   @@index([status])
+//   @@index([dueDate])
+//   @@index([assignedTo, status])
+// }
+
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -52,7 +966,23 @@ enum PaymentMethod {
 enum PaymentStatus {
   PENDING
   DEPOSIT_PAID
+  PARTIALLY_PAID
   PAID_IN_FULL
+}
+
+enum InstallmentStatus {
+  PENDING
+  PAID
+  LATE
+}
+
+// NEW: method used for a single payment entry
+enum PaymentEntryMethod {
+  CASH
+  BANK_TRANSFER
+  MB_WAY
+  CHECK
+  OTHER
 }
 
 enum ExpenseType {
@@ -88,9 +1018,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sales    Sale[]
-  expenses Expense[]
-  tasks    Task[]
+  sales            Sale[]
+  expenses         Expense[]
+  tasks            Task[]
+  dealsHandled     Deal[]         @relation("DealHandler")
+  paymentRecorded  PaymentEntry[] @relation("PaymentRecorder")
 }
 
 model Car {
@@ -124,6 +1056,7 @@ model Car {
   sale       Sale?
   testDrives TestDrive[]
   customers  CustomerCar[]
+  deal       Deal?
 
   @@index([status])
   @@index([make])
@@ -160,6 +1093,7 @@ model Customer {
   interestedCars CustomerCar[]
   testDrives     TestDrive[]
   sales          Sale[]
+  deal           Deal?
 
   @@index([status])
   @@index([followUpDate])
@@ -178,6 +1112,81 @@ model CustomerCar {
   @@unique([customerId, carId])
   @@index([customerId])
   @@index([carId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Deal: one per buyer — tracks the full transaction lifecycle
+// ─────────────────────────────────────────────────────────────────────────────
+model Deal {
+  id         String  @id @default(uuid())
+  customerId String  @unique
+  carId      String  @unique
+  handlerId  String? // salesperson who handled this deal
+
+  agreedPrice Float
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+
+  expectedFinalPaymentDate DateTime?
+  notes                    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer     Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  car          Car            @relation(fields: [carId], references: [id], onDelete: Cascade)
+  handler      User?          @relation("DealHandler", fields: [handlerId], references: [id])
+  installments Installment[]
+  payments     PaymentEntry[] // ← all actual payments made by this customer
+
+  @@index([handlerId])
+  @@index([paymentStatus])
+  @@index([expectedFinalPaymentDate])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PaymentEntry: every real payment a customer makes (deposit, partial, full)
+// This replaces the old depositAmount/depositDate fields — now fully tracked
+// ─────────────────────────────────────────────────────────────────────────────
+model PaymentEntry {
+  id          String             @id @default(uuid())
+  dealId      String
+  amount      Float
+  paidDate    DateTime
+  method      PaymentEntryMethod @default(CASH)
+  reference   String?            // e.g. bank transfer ref, receipt number
+  notes       String?
+  recordedBy  String?            // user who logged this payment
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  deal       Deal  @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  recorder   User? @relation("PaymentRecorder", fields: [recordedBy], references: [id])
+
+  @@index([dealId])
+  @@index([paidDate])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Installment: scheduled future payments (payment plan schedule)
+// ─────────────────────────────────────────────────────────────────────────────
+model Installment {
+  id                String            @id @default(uuid())
+  dealId            String
+  installmentNumber Int
+  amount            Float
+  dueDate           DateTime
+  paidDate          DateTime?
+  status            InstallmentStatus @default(PENDING)
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+  @@index([dueDate])
+  @@index([status])
 }
 
 model Sale {
@@ -260,3 +1269,4 @@ model Task {
   @@index([dueDate])
   @@index([assignedTo, status])
 }
+

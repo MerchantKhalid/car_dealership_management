@@ -32,12 +32,18 @@ export default function SalesPage() {
       if (endDate) params.set('endDate', endDate);
       if (paymentStatusFilter) params.set('paymentStatus', paymentStatusFilter);
 
+      // const res = await fetch(`/api/sales?${params.toString()}`);
+      // const data = await res.json();
+      // setSales(data);
+
       const res = await fetch(`/api/sales?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch sales');
       const data = await res.json();
-      setSales(data);
+      setSales(Array.isArray(data) ? data : []);
     } catch (error) {
       const message = handleClientError(error, 'fetchSales');
       toast.error(message);
+      setSales([]);
     } finally {
       setLoading(false);
     }

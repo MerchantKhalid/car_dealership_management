@@ -47,9 +47,13 @@ export default function NewSalePage() {
         fetch('/api/customers'),
       ]);
       const carsData = await carsRes.json();
+      // const customersData = await customersRes.json();
+      // setCars(carsData.cars || []);
+      // setCustomers(customersData);
+
       const customersData = await customersRes.json();
-      setCars(carsData.cars || []);
-      setCustomers(customersData);
+      setCars(Array.isArray(carsData) ? carsData : carsData.cars || []);
+      setCustomers(Array.isArray(customersData) ? customersData : []);
     } catch (error) {
       const message = handleClientError(error, 'fetchData');
       toast.error(message);
