@@ -372,7 +372,7 @@ import LoadingSpinner from '@/components/ui/loading-spinner';
 import StatusBadge from '@/components/ui/status-badge';
 import EmptyState from '@/components/ui/empty-state';
 import { formatCurrency, daysInInventory, carStatusLabels } from '@/lib/utils';
-import { CarType } from '@/types';
+import { CarWithRelations as CarType } from '@/types';
 import { useDebounce } from '@/hooks/useDebounce';
 
 // interface CarType {
