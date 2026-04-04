@@ -352,3 +352,5 @@ export type InstallmentInput = z.infer<typeof installmentSchema>;
 export type InstallmentUpdateInput = z.infer<typeof installmentUpdateSchema>;
 export type ExpenseInput = z.infer<typeof expenseSchema>;
 export type TaskInput = z.infer<typeof taskSchema>;
+export const carFormSchema = carSchema;
+export type CarFormValues = z.infer<typeof carSchema>;
