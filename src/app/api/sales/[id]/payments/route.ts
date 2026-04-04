@@ -6,9 +6,9 @@ import { authOptions } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
 
 const paymentSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
+  paidDate: z.string().min(1, 'Date is required'),
   amount: z.number().positive('Amount must be positive'),
-  method: z.enum(['CASH', 'BANK_TRANSFER', 'FINANCING', 'PAYMENT_PLAN']),
+  method: z.enum(['CASH', 'BANK_TRANSFER', 'MB_WAY', 'CHECK', 'OTHER']),
   reference: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -24,9 +24,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payments = await prisma.salePayment.findMany({
-      where: { saleId: params.id },
-      orderBy: { date: 'asc' },
+    const payments = await prisma.paymentEntry.findMany({
+      where: { dealId: params.id },
+      orderBy: { paidDate: 'asc' },
     });
 
     return NextResponse.json(payments);
@@ -53,43 +53,44 @@ export async function POST(
       );
     }
 
-    // Confirm sale exists
-    const sale = await prisma.sale.findUnique({
+    // Confirm deal exists
+    const deal = await prisma.deal.findUnique({
       where: { id: params.id },
       include: { payments: true },
     });
 
-    if (!sale) {
-      return NextResponse.json({ error: 'Sale not found' }, { status: 404 });
+    if (!deal) {
+      return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
     }
 
     const body = await req.json();
     const validated = paymentSchema.parse(body);
 
     // Create payment
-    const payment = await prisma.salePayment.create({
+    const payment = await prisma.paymentEntry.create({
       data: {
-        saleId: params.id,
-        date: new Date(validated.date),
+        dealId: params.id,
+        paidDate: new Date(validated.paidDate),
         amount: validated.amount,
         method: validated.method,
         reference: validated.reference || null,
         notes: validated.notes || null,
+        recordedBy: session.user.id,
       },
     });
 
-    // Recalculate and update paymentStatus on the Sale
-    const allPayments = [...sale.payments, payment];
+    // Recalculate and update paymentStatus on the Deal
+    const allPayments = [...deal.payments, payment];
     const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
 
     let newStatus: 'PENDING' | 'DEPOSIT_PAID' | 'PAID_IN_FULL' = 'PENDING';
-    if (totalPaid >= sale.salePrice) {
+    if (totalPaid >= deal.agreedPrice) {
       newStatus = 'PAID_IN_FULL';
     } else if (totalPaid > 0) {
       newStatus = 'DEPOSIT_PAID';
     }
 
-    await prisma.sale.update({
+    await prisma.deal.update({
       where: { id: params.id },
       data: { paymentStatus: newStatus },
     });
