@@ -23,6 +23,13 @@ export default function EditCarPage({ params }: { params: { id: string } }) {
     formState: { errors },
   } = useForm<CarFormValues>({
     resolver: zodResolver(carFormSchema),
+    defaultValues: {
+      status: 'AVAILABLE',
+      mileage: 0,
+      purchasePrice: 0,
+      targetPrice: 0,
+      minimumPrice: 0,
+    },
   });
 
   useEffect(() => {

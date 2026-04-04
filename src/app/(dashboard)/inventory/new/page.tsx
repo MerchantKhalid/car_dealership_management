@@ -18,6 +18,18 @@ export default function NewCarPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm<CarFormValues>({
+  //   resolver: zodResolver(carFormSchema),
+  //   defaultValues: {
+  //     status: 'AVAILABLE',
+  //     purchaseDate: new Date().toISOString().split('T')[0],
+  //   },
+  // });
+
   const {
     register,
     handleSubmit,
@@ -26,7 +38,10 @@ export default function NewCarPage() {
     resolver: zodResolver(carFormSchema),
     defaultValues: {
       status: 'AVAILABLE',
-      purchaseDate: new Date().toISOString().split('T')[0],
+      mileage: 0,
+      purchasePrice: 0,
+      targetPrice: 0,
+      minimumPrice: 0,
     },
   });
 

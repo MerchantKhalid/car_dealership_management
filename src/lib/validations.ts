@@ -221,9 +221,7 @@ export const carSchema = z.object({
   boughtFrom: z.string().optional().or(z.literal('')),
   targetPrice: z.number().min(0, 'Target price must be positive'),
   minimumPrice: z.number().min(0).optional().or(z.literal(0)),
-  status: z
-    .enum(['AVAILABLE', 'RESERVED', 'SOLD', 'IN_REPAIR', 'TEST_DRIVE'])
-    .default('AVAILABLE'),
+  status: z.enum(['AVAILABLE', 'RESERVED', 'SOLD', 'IN_REPAIR', 'TEST_DRIVE']),
   location: z.string().optional().or(z.literal('')),
   conditionNotes: z.string().optional().or(z.literal('')),
 });
