@@ -101,6 +101,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
@@ -130,7 +131,6 @@ export async function GET(
       return NextResponse.json({ error: 'Sale not found' }, { status: 404 });
     }
 
-    // Calculate profit
     const totalExpenses = sale.car.expenses.reduce(
       (sum, e) => sum + e.amount,
       0,
@@ -144,7 +144,6 @@ export async function GET(
 }
 
 // ─── PATCH /api/sales/[id] ────────────────────────────────────────────────────
-// Accepts any subset of editable Sale fields
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } },
@@ -164,30 +163,18 @@ export async function PATCH(
 
     const body = await req.json();
 
-    // Whitelist only the fields we allow editing
     const allowed = [
       'paymentStatus',
       'paymentMethod',
-      'dueDate',
       'contractUrl',
-      'cnic',
-      'dealNotes',
-      'deliveryStatus',
-      'registrationStatus',
       'commission',
     ] as const;
 
-    type AllowedKey = (typeof allowed)[number];
-    const data: Partial<Record<AllowedKey, unknown>> = {};
+    const data: Prisma.SaleUpdateInput = {};
 
     for (const key of allowed) {
       if (key in body) {
-        // Coerce dueDate string → Date | null
-        if (key === 'dueDate') {
-          data[key] = body[key] ? new Date(body[key] as string) : null;
-        } else {
-          data[key] = body[key];
-        }
+        (data as Record<string, unknown>)[key] = body[key];
       }
     }
 
